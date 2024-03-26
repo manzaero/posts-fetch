@@ -37,8 +37,8 @@ function App() {
   return (
     <div className="container">
         {
-            posts.map(post => (
-                <Post post={post}/>
+            posts.map((post, i) => (
+                <Post post={post} key={i}/>
             ))
         }
         {page < 5 && (
