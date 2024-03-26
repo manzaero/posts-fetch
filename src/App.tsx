@@ -1,33 +1,54 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
+import {Post} from "./Post";
 
 function App() {
     const [posts, setPosts] = useState([]);
-    const [currentPage, setCurrentPage]  = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(false);
-
-
+    const [page, setPage] = useState(1)
 
     useEffect(()=> {
+        fetch(`https://jsonplaceholder.typicode.com/posts?_page=${page}&_limit=10`)
+            .then(response => response.json())
+            .then(data => {
+                // @ts-ignore
+                setPosts(prevPosts => [...prevPosts, ...data])
+                console.log(data)
+            });
+    }, [page])
 
-        const fetchRequest = async () => {
-            const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-            const postData = await response.json()
-            console.log(postData)
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight)
+        {
+            if (page < 5) {
+                setPage(prevPage => prevPage + 1)
+            }
         }
-        fetchRequest()
+
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll)
     }, [])
+
+    const loadMore = () => {
+        setPage(prevPage => prevPage + 1)
+    }
   return (
     <div className="container">
-      <h2>
-          <div className="title">
-              title
-          </div>
-          <p className="post">
-              post
-          </p>
-      </h2>
+        {
+            posts.map(post => (
+                <Post post={post}/>
+            ))
+        }
+        {page < 5 && (
+            <p>Loading more...</p>
+        )}
+        {
+            page >= 5 && (
+                <button onClick={loadMore}>load</button>
+            )
+        }
     </div>
   );
 }
